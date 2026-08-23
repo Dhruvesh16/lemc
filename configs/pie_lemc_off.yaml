@@ -1,0 +1,20 @@
+defaults: [default]
+
+dataset: pie
+use_lemc: false
+
+backbone:
+  hidden_dim: 128
+  num_layers: 2
+  predict_intent: true
+
+train:
+  batch_size: 64
+  lr: 1.0e-3
+  epochs: 30
+  early_stop_patience: 8
+  overlap_train: 0.5
+
+loss:
+  traj_weight: 1.0
+  intent_weight: 1.0

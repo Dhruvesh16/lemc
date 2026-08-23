@@ -1,0 +1,27 @@
+defaults: [default]
+
+dataset: pie
+use_lemc: true
+
+lemc:
+  hidden_dim: 32
+  temporal_net: gru
+  # scale-ratio cue is unconditionally included in compute_frame_stats (not a
+  # flag) -- locked in by the density gate verdict (AMBER), see DECISIONS.md
+
+backbone:
+  hidden_dim: 128
+  num_layers: 2
+  predict_intent: true
+
+train:
+  batch_size: 64
+  lr: 1.0e-3
+  epochs: 40
+  early_stop_patience: 20
+  overlap_train: 0.5
+
+loss:
+  traj_weight: 1.0
+  intent_weight: 1.0
+  residual_l2_penalty: 1.0e-4

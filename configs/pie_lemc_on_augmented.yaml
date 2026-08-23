@@ -1,0 +1,28 @@
+defaults: [default]
+
+dataset: pie
+track_store_file: pie_track_store_augmented.pkl
+run_tag: augmented  # keeps checkpoint dir + validation output filenames from colliding with pie_lemc_on.yaml
+use_lemc: true
+max_agents: 32  # augmented density max=29 (test split) vs base's 18 -- default.yaml's 20 is too tight here
+
+lemc:
+  hidden_dim: 32
+  temporal_net: gru
+
+backbone:
+  hidden_dim: 128
+  num_layers: 2
+  predict_intent: true
+
+train:
+  batch_size: 64
+  lr: 1.0e-3
+  epochs: 40
+  early_stop_patience: 20
+  overlap_train: 0.5
+
+loss:
+  traj_weight: 1.0
+  intent_weight: 1.0
+  residual_l2_penalty: 1.0e-4

@@ -1,0 +1,15 @@
+protocol:
+  t_obs: 15 # 0.5s @ 30fps
+  t_pred: 45 # 1.5s @ 30fps
+  fps: 30
+  seeds: [0, 1, 2]
+  coord_format: [cx, cy, w, h] # normalized by image dims, stats fit on train split only
+  normalize:
+    method: image_dims
+    fit_split: train
+
+metrics:
+  trajectory: [ade, fde, mse_0.5s, mse_1.0s, mse_1.5s]
+  intent: [auc, f1, precision, recall]
+
+max_agents: 20 # padding cap, set from density_check.py percentiles
