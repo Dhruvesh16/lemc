@@ -170,3 +170,43 @@ Next: repeat with more seeds, then decide whether density-boost +
 auxiliary-loss both stay in the final design or whether density boost alone
 is droppable now that (2) is clearly the load-bearing fix.
 
+## Path-to-paper update (2026-08-25)
+
+Steps 1–2 on attempt-3: sign gate **FAIL** (0.75% standing flatten); LEMC-on
+ADE **worse** (65.9 vs 43.9). OBD-magnitude aux is not valid compensation.
+
+Adopted Zhang protocol (τ=16, TTE 30–60, 50% overlap) + ARB/FRB. Full-affine
+ORB (not translation) is the geometric fix: standing flatten **93%**, ADE
+**60.5±1.8** ≈ baseline **60.8±3.3**. Learned LEMC still fails to match ORB
+under joint loss. GT speed helps intent (AUC 0.93) but hurts ADE (67.0).
+JAAD baseline (3 seeds, test n=295): ADE **83.1±2.0**, FDE **156.3±4.3**, AUC **0.47±0.05**, F1 **0.90±0.00**. Fixed ORB on JAAD requires video clips → ORB extract (`scripts/14–15`, then `10_run_jaad_grid.sh` in Docker GPU).
+
+## Conference framing freeze (2026-08-26)
+
+Locked for ITSC/IV-class submission. Do not silently re-litigate.
+
+**Primary method name:** Fixed ORB-affine compensation (sensor-free at inference).
+**Learned LEMC:** failed ablation only (OBD-magnitude / learned ORB / no-aux).
+
+**Primary metrics:** ADE/FDE (centres), ARB/FRB @ 30 frames, standing-pedestrian
+flatten % (variance gate). AUC/F1 are secondary.
+
+**Contribution claim (sell this):**
+1. Full partial-affine ORB recovers camera motion without a speed sensor.
+2. Standing variance gate exposes why magnitude–speed aux fails.
+3. Fixed ORB is ADE-neutral on PIE vs bbox-only GRU, helps under acceleration,
+   and transfers to JAAD (no OBD).
+4. GT speed helps intent / hurts ADE — supports LIM; Zhang needs the sensor.
+
+**Do not claim:** beating Zhang TIP ADE 17.41 (I3D + vision). Scope is a
+bbox-only geometric compensation study with an honest backbone gap.
+
+**Venue bar:** conference (ITSC or IV); JAAD required in main paper.
+
+## JAAD density gate (2026-08-26)
+
+Built `jaad_track_store.pkl` from JAAD 2.0 annotations (323 videos; train/val/test
+177/29/117). Train-split agent density: **median 4.0 / frame** (mean 5.0, p95 11,
+max 19). **Verdict: GREEN** — no detector density boost required on JAAD.
+ORB/image experiments still need `JAAD_clips` → `images/` (download blocked on
+this host; see `scripts/14_download_jaad_clips.sh`).

@@ -23,9 +23,13 @@ class TrajectoryPredictor(nn.Module):
         self.backbone = GRUTrajectoryModel(**backbone_cfg)
 
     def forward(
-        self, agent_tracks: torch.Tensor, agent_mask: torch.Tensor
+        self,
+        agent_tracks: torch.Tensor,
+        agent_mask: torch.Tensor,
+        ego_speed: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor | None, torch.Tensor | None]:
         """agent_tracks: [B, T_obs, N, 4], agent_mask: [B, T_obs, N].
+        ego_speed: [B, T_obs] when backbone.use_speed_input (GT OBD ablation).
         Returns (traj_pred, intent_logit, residual) -- residual is None when use_lemc=False."""
         if self.lemc is not None:
             ego_track, residual = self.lemc(agent_tracks, agent_mask)
@@ -33,5 +37,5 @@ class TrajectoryPredictor(nn.Module):
             ego_track = agent_tracks[:, :, EGO_IDX, :]
             residual = None
 
-        traj_pred, intent_logit = self.backbone(ego_track)
+        traj_pred, intent_logit = self.backbone(ego_track, ego_speed=ego_speed)
         return traj_pred, intent_logit, residual

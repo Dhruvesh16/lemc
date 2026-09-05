@@ -14,7 +14,7 @@ import torch
 from scipy.stats import pearsonr
 from torch.utils.data import DataLoader
 
-from lemc.data.dataset import LEMCWindowDataset, build_window_index, denormalize_xy
+from lemc.data.dataset import LEMCWindowDataset, build_window_index, denormalize_xy, protocol_tte_kwargs
 from lemc.data.paths import track_store_path
 from lemc.data.track_store import load_track_store
 from lemc.models.predictor import TrajectoryPredictor
@@ -41,9 +41,13 @@ def main():
 
     t_obs, t_pred = cfg["protocol"]["t_obs"], cfg["protocol"]["t_pred"]
     max_agents = cfg["max_agents"]
+    tte_kw = protocol_tte_kwargs(cfg)
+    overlap_eval = cfg["protocol"].get("overlap_eval", 0.0)
 
     stores = load_track_store(track_store_path(cfg))
-    windows = build_window_index(stores, args.split, t_obs, t_pred, max_agents, overlap=0.0)
+    windows = build_window_index(
+        stores, args.split, t_obs, t_pred, max_agents, overlap=overlap_eval, **tte_kw
+    )
 
     with open(os.path.join(args.checkpoint_dir, "norm_stats.pkl"), "rb") as f:
         norm_stats = pickle.load(f)

@@ -1,0 +1,25 @@
+defaults: [default]
+
+dataset: jaad
+track_store_file: jaad_track_store.pkl
+run_tag: fixed_orb_v2
+use_lemc: false
+max_agents: 32
+orb_affines_file: jaad_orb_affines.pkl
+fixed_orb: true
+
+backbone:
+  hidden_dim: 128
+  num_layers: 2
+  predict_intent: true
+
+train:
+  batch_size: 64
+  lr: 1.0e-3
+  epochs: 40
+  early_stop_patience: 20
+  overlap_train: 0.5
+
+loss:
+  traj_weight: 1.0
+  intent_weight: 1.0

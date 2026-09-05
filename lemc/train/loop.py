@@ -2,10 +2,18 @@ from __future__ import annotations
 
 import torch
 
-from .losses import intent_loss, obd_correlation_loss, residual_l2_penalty, trajectory_loss
+from lemc.utils.device import move_batch
+
+from .losses import (
+    intent_loss,
+    obd_correlation_loss,
+    orb_regression_loss,
+    residual_l2_penalty,
+    trajectory_loss,
+)
 
 
-def run_epoch(model, loader, optimizer, cfg: dict, train: bool) -> tuple[float, dict | None]:
+def run_epoch(model, loader, optimizer, cfg: dict, train: bool, device: torch.device | None = None) -> tuple[float, dict | None]:
     """Returns (avg_loss, residual_stats). residual_stats is None when the
     model has no LEMC module (use_lemc=False), else {'mean': ..., 'std': ...}
     over every per-transition residual magnitude seen this epoch -- the
@@ -14,23 +22,38 @@ def run_epoch(model, loader, optimizer, cfg: dict, train: bool) -> tuple[float, 
     total_loss = 0.0
     n_batches = 0
     residual_mags = []
+    use_speed_input = cfg.get("use_speed_input", False)
+
+    dev = device or next(model.parameters()).device
 
     for batch in loader:
+        batch = move_batch(batch, dev)
         agent_tracks = batch["agent_tracks"]
         agent_mask = batch["agent_mask"]
         target_xy = batch["target_track"][:, :, :2]
+        ego_speed = batch["ego_speed"] if use_speed_input else None
 
         with torch.set_grad_enabled(train):
-            traj_pred, intent_logit, residual = model(agent_tracks, agent_mask)
+            traj_pred, intent_logit, residual = model(agent_tracks, agent_mask, ego_speed=ego_speed)
             tl = trajectory_loss(traj_pred, target_xy, batch["target_mask"])
             il = intent_loss(intent_logit, batch["crossing_label"]) if intent_logit is not None else torch.zeros(())
             rl = residual_l2_penalty(residual)
-            ol = obd_correlation_loss(residual, batch["ego_speed"]) if cfg["loss"].get("obd_weight", 0.0) else torch.zeros(())
+            ol = (
+                obd_correlation_loss(residual, batch["ego_speed"])
+                if cfg["loss"].get("obd_weight", 0.0)
+                else torch.zeros(())
+            )
+            orb_l = (
+                orb_regression_loss(residual, batch["orb_shift"], batch["orb_mask"])
+                if cfg["loss"].get("orb_weight", 0.0)
+                else torch.zeros(())
+            )
             loss = (
                 cfg["loss"]["traj_weight"] * tl
                 + cfg["loss"]["intent_weight"] * il
                 + cfg["loss"].get("residual_l2_penalty", 0.0) * rl
                 + cfg["loss"].get("obd_weight", 0.0) * ol
+                + cfg["loss"].get("orb_weight", 0.0) * orb_l
             )
 
         if train:

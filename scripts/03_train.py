@@ -9,14 +9,34 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 from torch.utils.data import DataLoader
 
-from lemc.data.dataset import LEMCWindowDataset, build_window_index, fit_norm_stats
-from lemc.data.paths import track_store_path
+from lemc.data.dataset import LEMCWindowDataset, build_window_index, fit_norm_stats, protocol_tte_kwargs
+from lemc.data.paths import TRACK_STORE_DIR, track_store_path
 from lemc.data.track_store import load_track_store
 from lemc.models.predictor import TrajectoryPredictor
 from lemc.train.loop import CollapseMonitor, reference_displacement_scale, run_epoch
 from lemc.train.seeds import seed_everything
 from lemc.utils.config import load_config, run_name as build_run_name
+from lemc.utils.device import get_device
 from lemc.utils.logging import CSVLogger
+
+
+def _load_orb_affines(cfg: dict):
+    fname = cfg.get("orb_affines_file") or cfg.get("orb_shifts_file")
+    if not fname:
+        return None, None
+    # prefer affine cache when present
+    affine_name = cfg.get("orb_affines_file", "pie_orb_affines.pkl")
+    affine_path = affine_name if os.path.isabs(affine_name) else os.path.join(TRACK_STORE_DIR, affine_name)
+    if os.path.exists(affine_path):
+        with open(affine_path, "rb") as f:
+            return None, pickle.load(f)
+    path = fname if os.path.isabs(fname) else os.path.join(TRACK_STORE_DIR, fname)
+    if not os.path.exists(path):
+        raise FileNotFoundError(
+            f"ORB cache missing ({affine_path} and {path}) — run scripts/09b_extract_orb_affine.py"
+        )
+    with open(path, "rb") as f:
+        return pickle.load(f), None
 
 
 def main():
@@ -32,19 +52,50 @@ def main():
     t_obs, t_pred = cfg["protocol"]["t_obs"], cfg["protocol"]["t_pred"]
     max_agents = cfg["max_agents"]
     use_lemc = cfg.get("use_lemc", False)
+    tte_kw = protocol_tte_kwargs(cfg)
+    overlap_eval = cfg["protocol"].get("overlap_eval", 0.0)
 
     stores = load_track_store(track_store_path(cfg))
+    orb_shifts, orb_affines = (None, None)
+    if cfg["loss"].get("orb_weight", 0.0):
+        orb_shifts, orb_affines = _load_orb_affines(cfg)
 
     train_windows = build_window_index(
-        stores, "train", t_obs, t_pred, max_agents, overlap=cfg["train"].get("overlap_train", 0.5)
+        stores,
+        "train",
+        t_obs,
+        t_pred,
+        max_agents,
+        overlap=cfg["train"].get("overlap_train", 0.5),
+        **tte_kw,
     )
-    val_windows = build_window_index(stores, "val", t_obs, t_pred, max_agents, overlap=0.0)
+    val_windows = build_window_index(
+        stores, "val", t_obs, t_pred, max_agents, overlap=overlap_eval, **tte_kw
+    )
 
     ds_train_raw = LEMCWindowDataset(stores, train_windows, t_obs, t_pred, max_agents, norm_stats=None)
     norm_stats = fit_norm_stats(ds_train_raw)
 
-    ds_train = LEMCWindowDataset(stores, train_windows, t_obs, t_pred, max_agents, norm_stats=norm_stats)
-    ds_val = LEMCWindowDataset(stores, val_windows, t_obs, t_pred, max_agents, norm_stats=norm_stats)
+    ds_train = LEMCWindowDataset(
+        stores,
+        train_windows,
+        t_obs,
+        t_pred,
+        max_agents,
+        norm_stats=norm_stats,
+        orb_shifts=orb_shifts,
+        orb_affines=orb_affines,
+    )
+    ds_val = LEMCWindowDataset(
+        stores,
+        val_windows,
+        t_obs,
+        t_pred,
+        max_agents,
+        norm_stats=norm_stats,
+        orb_shifts=orb_shifts,
+        orb_affines=orb_affines,
+    )
 
     train_loader = DataLoader(ds_train, batch_size=cfg["train"]["batch_size"], shuffle=True)
     val_loader = DataLoader(ds_val, batch_size=cfg["train"]["batch_size"], shuffle=False)
@@ -55,10 +106,13 @@ def main():
         num_layers=cfg["backbone"]["num_layers"],
         t_pred=t_pred,
         predict_intent=cfg["backbone"].get("predict_intent", True),
+        use_speed_input=cfg.get("use_speed_input", False) or cfg["backbone"].get("use_speed_input", False),
     )
     lemc_cfg = cfg.get("lemc", {})
-    model = TrajectoryPredictor(use_lemc=use_lemc, lemc_cfg=lemc_cfg, backbone_cfg=backbone_cfg)
+    device = get_device()
+    model = TrajectoryPredictor(use_lemc=use_lemc, lemc_cfg=lemc_cfg, backbone_cfg=backbone_cfg).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg["train"]["lr"])
+    print(f"device: {device}")
 
     run_name = build_run_name(cfg, seed)
     ckpt_dir = os.path.join("checkpoints", run_name)
@@ -79,8 +133,8 @@ def main():
 
     for epoch in range(cfg["train"]["epochs"]):
         t0 = time.time()
-        train_loss, train_residual = run_epoch(model, train_loader, optimizer, cfg, train=True)
-        val_loss, val_residual = run_epoch(model, val_loader, optimizer, cfg, train=False)
+        train_loss, train_residual = run_epoch(model, train_loader, optimizer, cfg, train=True, device=device)
+        val_loss, val_residual = run_epoch(model, val_loader, optimizer, cfg, train=False, device=device)
         dt = time.time() - t0
 
         log_row = {"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss, "time_s": dt}
@@ -103,8 +157,6 @@ def main():
         logger.log(log_row)
 
         if collapse_monitor is not None:
-            # train vs val logged separately -- watch for the subtler collapse
-            # variant where residual is only nonzero on train (memorized, not general)
             collapse_monitor.check(train_residual["mean"])
 
         if val_loss < best_val:

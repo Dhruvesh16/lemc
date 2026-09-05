@@ -1,0 +1,13 @@
+ade: 95.5056
+fde: 190.3385
+mse_0.5s: 9819.3184
+mse_1.0s: 28095.7910
+mse_1.5s: 72302.9688
+arb: 50.2388
+frb: 84.9444
+auc: 0.7986
+f1: 0.6275
+precision: 0.7917
+recall: 0.5198
+frac_flatten_all: 0.7671
+frac_flatten_standing_moving: 0.9312

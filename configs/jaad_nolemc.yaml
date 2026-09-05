@@ -1,0 +1,23 @@
+defaults: [default]
+
+dataset: jaad
+track_store_file: jaad_track_store.pkl
+run_tag: jaad_base
+use_lemc: false
+max_agents: 32
+
+backbone:
+  hidden_dim: 128
+  num_layers: 2
+  predict_intent: true
+
+train:
+  batch_size: 64
+  lr: 1.0e-3
+  epochs: 40
+  early_stop_patience: 20
+  overlap_train: 0.5
+
+loss:
+  traj_weight: 1.0
+  intent_weight: 1.0

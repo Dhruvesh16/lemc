@@ -1,7 +1,11 @@
 protocol:
-  t_obs: 15 # 0.5s @ 30fps
+  t_obs: 16 # field standard (Zhang et al. TIP 2024); was 15
   t_pred: 45 # 1.5s @ 30fps
   fps: 30
+  # Time-to-event window relative to crossing_point (end of obs → event)
+  tte_min: 30 # 1.0s
+  tte_max: 60 # 2.0s
+  overlap_eval: 0.5 # match Zhang / BiPeds sampling
   seeds: [0, 1, 2]
   coord_format: [cx, cy, w, h] # normalized by image dims, stats fit on train split only
   normalize:
@@ -9,7 +13,8 @@ protocol:
     fit_split: train
 
 metrics:
-  trajectory: [ade, fde, mse_0.5s, mse_1.0s, mse_1.5s]
+  trajectory: [ade, fde, mse_0.5s, mse_1.0s, mse_1.5s, arb, frb]
   intent: [auc, f1, precision, recall]
+  arb_frb_horizon: 30 # frames; Zhang et al. report ARB/FRB at 1s
 
 max_agents: 20 # padding cap, set from density_check.py percentiles

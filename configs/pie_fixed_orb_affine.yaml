@@ -1,0 +1,25 @@
+defaults: [default]
+
+dataset: pie
+track_store_file: pie_track_store_augmented.pkl
+orb_affines_file: pie_orb_affines.pkl
+run_tag: fixed_orb_v2
+fixed_orb_legacy_run: pie_fixed_orb_affine_v2
+use_lemc: false
+max_agents: 32
+
+backbone:
+  hidden_dim: 128
+  num_layers: 2
+  predict_intent: true
+
+train:
+  batch_size: 64
+  lr: 1.0e-3
+  epochs: 40
+  early_stop_patience: 20
+  overlap_train: 0.5
+
+loss:
+  traj_weight: 1.0
+  intent_weight: 1.0

@@ -8,12 +8,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 from torch.utils.data import DataLoader
 
-from lemc.data.dataset import LEMCWindowDataset, build_window_index, denormalize_xy
+from lemc.data.dataset import LEMCWindowDataset, build_window_index, denormalize_xy, protocol_tte_kwargs
 from lemc.data.paths import track_store_path
 from lemc.data.track_store import load_track_store
-from lemc.eval.metrics import intent_metrics, trajectory_metrics
+from lemc.eval.metrics import box_rmse_metrics, intent_metrics, trajectory_metrics
 from lemc.models.predictor import TrajectoryPredictor
 from lemc.utils.config import load_config
+from lemc.utils.device import get_device, move_batch
 
 # PIE images are all 1920x1080; JAAD may differ once its dims are confirmed (plan Step 9).
 PIE_WIDTH, PIE_HEIGHT = 1920.0, 1080.0
@@ -30,9 +31,15 @@ def main():
     t_obs, t_pred, fps = cfg["protocol"]["t_obs"], cfg["protocol"]["t_pred"], cfg["protocol"]["fps"]
     max_agents = cfg["max_agents"]
     use_lemc = cfg.get("use_lemc", False)
+    use_speed = cfg.get("use_speed_input", False) or cfg["backbone"].get("use_speed_input", False)
+    tte_kw = protocol_tte_kwargs(cfg)
+    overlap_eval = cfg["protocol"].get("overlap_eval", 0.0)
+    arb_horizon = cfg.get("metrics", {}).get("arb_frb_horizon", 30)
 
     stores = load_track_store(track_store_path(cfg))
-    windows = build_window_index(stores, args.split, t_obs, t_pred, max_agents, overlap=0.0)
+    windows = build_window_index(
+        stores, args.split, t_obs, t_pred, max_agents, overlap=overlap_eval, **tte_kw
+    )
 
     with open(os.path.join(args.checkpoint_dir, "norm_stats.pkl"), "rb") as f:
         norm_stats = pickle.load(f)
@@ -46,27 +53,46 @@ def main():
         num_layers=cfg["backbone"]["num_layers"],
         t_pred=t_pred,
         predict_intent=cfg["backbone"].get("predict_intent", True),
+        use_speed_input=use_speed,
     )
     lemc_cfg = cfg.get("lemc", {})
     model = TrajectoryPredictor(use_lemc=use_lemc, lemc_cfg=lemc_cfg, backbone_cfg=backbone_cfg)
-    model.load_state_dict(torch.load(os.path.join(args.checkpoint_dir, "best.pt"), map_location="cpu"))
+    device = get_device()
+    model.load_state_dict(torch.load(os.path.join(args.checkpoint_dir, "best.pt"), map_location=device))
+    model.to(device)
     model.eval()
+    print(f"device: {device}")
 
-    width, height = (PIE_WIDTH, PIE_HEIGHT) if cfg["dataset"] == "pie" else (None, None)
-    if width is None:
-        raise NotImplementedError("Confirm JAAD image dims before evaluating on JAAD (plan Step 9).")
+    # PIE and JAAD are both 1920x1080 in the official releases we use.
+    width, height = PIE_WIDTH, PIE_HEIGHT
 
     all_pred_px, all_target_px, all_target_mask = [], [], []
+    all_pred_boxes, all_target_boxes = [], []
     all_intent_probs, all_intent_labels = [], []
     all_residual_mag = []
 
     with torch.no_grad():
         for batch in loader:
-            traj_pred, intent_logit, residual = model(batch["agent_tracks"], batch["agent_mask"])
+            batch = move_batch(batch, device)
+            ego_speed = batch["ego_speed"] if use_speed else None
+            traj_pred, intent_logit, residual = model(
+                batch["agent_tracks"], batch["agent_mask"], ego_speed=ego_speed
+            )
 
-            all_pred_px.append(denormalize_xy(traj_pred, norm_stats, width, height))
-            all_target_px.append(denormalize_xy(batch["target_track"][:, :, :2], norm_stats, width, height))
+            pred_xy = denormalize_xy(traj_pred, norm_stats, width, height)
+            tgt_xy = denormalize_xy(batch["target_track"][:, :, :2], norm_stats, width, height)
+            all_pred_px.append(pred_xy)
+            all_target_px.append(tgt_xy)
             all_target_mask.append(batch["target_mask"])
+
+            # ARB/FRB: carry last observed w,h (image-dim-normalized) into pixel boxes
+            last_wh = batch["agent_tracks"][:, -1, 0, 2:]  # [B, 2] image-dim-norm
+            wh_px = last_wh * torch.tensor([width, height], dtype=last_wh.dtype)
+            wh_tgt = batch["target_track"][:, :, 2:] * torch.tensor([width, height], dtype=last_wh.dtype)
+            pred_boxes = torch.cat([pred_xy, wh_px.unsqueeze(1).expand(-1, t_pred, -1)], dim=-1)
+            tgt_boxes = torch.cat([tgt_xy, wh_tgt], dim=-1)
+            all_pred_boxes.append(pred_boxes)
+            all_target_boxes.append(tgt_boxes)
 
             if intent_logit is not None:
                 probs = torch.sigmoid(intent_logit).squeeze(-1)
@@ -83,6 +109,11 @@ def main():
     target_mask = torch.cat(all_target_mask)
 
     traj_results = trajectory_metrics(pred_px, target_px, target_mask, fps, t_pred)
+    box_results = box_rmse_metrics(
+        torch.cat(all_pred_boxes), torch.cat(all_target_boxes), target_mask, horizon=arb_horizon
+    )
+    traj_results.update(box_results)
+
     print(f"=== Trajectory metrics ({cfg['dataset']}, {args.split}, n={len(ds)}) ===")
     for k, v in traj_results.items():
         print(f"  {k}: {v:.4f}")

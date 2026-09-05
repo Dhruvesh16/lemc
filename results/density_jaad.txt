@@ -1,0 +1,45 @@
+=== Density check: jaad_track_store ===
+
+-- train --
+  n_frames: 37074
+  median: 4.0
+  mean: 5.008253762744781
+  p25: 2.0
+  p75: 7.0
+  p95: 11.0
+  max: 19
+  VERDICT (train): green: proceed with plain multi-agent LEMC
+  histogram saved to /home/x870e/Documents/srikar/lemc/results/density_jaad_track_store_train.png
+
+-- val --
+  n_frames: 6413
+  median: 4.0
+  mean: 4.644939965694682
+  p25: 2.0
+  p75: 6.0
+  p95: 11.0
+  max: 18
+  histogram saved to /home/x870e/Documents/srikar/lemc/results/density_jaad_track_store_val.png
+
+-- test --
+  n_frames: 27092
+  median: 4.0
+  mean: 5.392662040454747
+  p25: 2.0
+  p75: 7.0
+  p95: 14.0
+  max: 24
+  histogram saved to /home/x870e/Documents/srikar/lemc/results/density_jaad_track_store_test.png
+
+-- all splits combined --
+  n_frames: 70579
+  median: 4.0
+  mean: 5.122798566145738
+  p25: 2.0
+  p75: 7.0
+  p95: 13.0
+  max: 24
+  VERDICT (all): green: proceed with plain multi-agent LEMC
+  histogram saved to /home/x870e/Documents/srikar/lemc/results/density_jaad_track_store_all_splits_combined.png
+
+=== GATE DECISION (train split, official protocol): green: proceed with plain multi-agent LEMC ===

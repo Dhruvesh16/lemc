@@ -9,3 +9,4 @@ results/*.png
 results/*.csv
 *.log
 .pytest_cache/
+data_external/

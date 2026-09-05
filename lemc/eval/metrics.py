@@ -34,6 +34,47 @@ def trajectory_metrics(
     return result
 
 
+def per_window_ade(
+    pred_xy_px: torch.Tensor, target_xy_px: torch.Tensor, target_mask: torch.Tensor
+) -> torch.Tensor:
+    """Per-window ADE [B] in pixels."""
+    diff = pred_xy_px - target_xy_px
+    dist = diff.norm(dim=-1)
+    mask = target_mask.float()
+    return (dist * mask).sum(dim=-1) / mask.sum(dim=-1).clamp(min=1)
+
+
+def _cxcywh_to_corners(boxes: torch.Tensor) -> torch.Tensor:
+    """boxes: [..., 4] (cx, cy, w, h) -> [..., 4] (x1, y1, x2, y2)."""
+    cx, cy, w, h = boxes.unbind(dim=-1)
+    return torch.stack([cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2], dim=-1)
+
+
+def box_rmse_metrics(
+    pred_boxes_px: torch.Tensor,
+    target_boxes_px: torch.Tensor,
+    target_mask: torch.Tensor,
+    horizon: int = 30,
+) -> dict[str, float]:
+    """ARB / FRB in pixels over the first `horizon` prediction frames (Zhang et al.).
+
+    pred/target_boxes_px: [B, T_pred, 4] in (cx, cy, w, h) pixel units.
+    ARB = mean RMSE of the four corner coords over frames [0, horizon).
+    FRB = same RMSE at frame horizon-1 only.
+    """
+    T = min(horizon, pred_boxes_px.shape[1])
+    pred_c = _cxcywh_to_corners(pred_boxes_px[:, :T])
+    tgt_c = _cxcywh_to_corners(target_boxes_px[:, :T])
+    mask = target_mask[:, :T].float()
+
+    # per-frame RMSE over the 4 corner coords, then average
+    sq = ((pred_c - tgt_c) ** 2).mean(dim=-1)  # [B, T]
+    rmse = sq.clamp(min=0).sqrt()
+    arb = (rmse * mask).sum() / mask.sum().clamp(min=1)
+    frb = rmse[:, T - 1].mean()
+    return {"arb": arb.item(), "frb": frb.item()}
+
+
 def intent_metrics(probs, labels) -> dict[str, float]:
     """probs, labels: 1D numpy arrays of equal length, NaN labels already filtered by caller."""
     preds = (probs >= 0.5).astype(int)

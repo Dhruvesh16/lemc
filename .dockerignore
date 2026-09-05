@@ -1,0 +1,20 @@
+# Keep the image small — data is bind-mounted at runtime via docker/run.sh
+.git
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+
+data_external/
+data_cache/
+checkpoints/
+results/
+*.zip
+*.pkl
+yolov8n.pt
+LEMC_*.pdf
+paper/*.pdf
+*.mp4
+*.png
+!results/figures/*.png

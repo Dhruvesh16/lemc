@@ -1,0 +1,14 @@
+[test] built 1773 windows, dropped 79 (ego gap or incomplete future), dropped_tte=30242
+=== Trajectory metrics (pie, test, n=1773) ===
+  ade: 67.7184
+  fde: 132.6547
+  mse_0.5s: 3505.8008
+  mse_1.0s: 13659.8740
+  mse_1.5s: 40702.0234
+  arb: 37.8677
+  frb: 61.7752
+=== Intent metrics (pie, test, n=1478) ===
+  auc: 0.9352
+  f1: 0.8683
+  precision: 0.8599
+  recall: 0.8769

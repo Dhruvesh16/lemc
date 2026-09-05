@@ -1,0 +1,4 @@
+[test] built 1773 windows, dropped 79 (ego gap or incomplete future), dropped_tte=30242
+n=1773 baseline ADE mean=63.68 fixed ORB mean=59.13
+paired diff (ORB-baseline) mean=-4.55 median=-1.85
+Wilcoxon stat=732716.0 p=0.0129

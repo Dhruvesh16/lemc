@@ -1,0 +1,15 @@
+[test] built 295 windows, dropped 4 (ego gap or incomplete future), dropped_tte=3748
+device: cpu
+=== Trajectory metrics (jaad, test, n=295) ===
+  ade: 85.4501
+  fde: 150.8232
+  mse_0.5s: 6751.5640
+  mse_1.0s: 15297.3174
+  mse_1.5s: 48099.9805
+  arb: 47.7416
+  frb: 68.2930
+=== Intent metrics (jaad, test, n=294) ===
+  auc: 0.5466
+  f1: 0.9050
+  precision: 0.8265
+  recall: 1.0000

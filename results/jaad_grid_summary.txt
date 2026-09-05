@@ -1,0 +1,17 @@
+## jaad_nolemc (n=3 seeds)
+  ade: 83.10 ± 2.00
+  fde: 156.25 ± 4.31
+  arb: 44.76 ± 2.15
+  frb: 71.23 ± 2.08
+  auc: 0.47 ± 0.05
+  f1: 0.90 ± 0.00
+
+## jaad_nolemc_fixed_orb_v2 (n=3 seeds)
+  ade: 62.68 ± 2.34
+  fde: 120.11 ± 2.82
+  arb: 34.80 ± 2.25
+  frb: 54.17 ± 0.91
+  auc: 0.44 ± 0.00
+  f1: 0.90 ± 0.00
+  frac_flatten_all: 0.72 ± 0.00
+  frac_flatten_standing_moving: 0.97 ± 0.00

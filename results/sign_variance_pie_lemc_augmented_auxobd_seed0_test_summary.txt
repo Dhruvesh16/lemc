@@ -1,0 +1,4 @@
+n_all=16965
+frac_comp_lower_all=0.006720
+n_standing_moving=3885
+frac_comp_lower_standing_moving=0.007465

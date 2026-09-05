@@ -6,7 +6,7 @@ import torch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from lemc.eval.metrics import horizon_indices, intent_metrics, trajectory_metrics
+from lemc.eval.metrics import box_rmse_metrics, horizon_indices, intent_metrics, trajectory_metrics
 
 
 def test_horizon_indices_match_frozen_protocol():
@@ -45,3 +45,24 @@ def test_intent_metrics_perfect_predictions():
     assert result["f1"] == 1.0
     assert result["precision"] == 1.0
     assert result["recall"] == 1.0
+
+
+def test_box_rmse_zero_when_equal():
+    B, T = 2, 45
+    boxes = torch.rand(B, T, 4) * 100 + 50
+    mask = torch.ones(B, T, dtype=torch.bool)
+    result = box_rmse_metrics(boxes.clone(), boxes, mask, horizon=30)
+    assert result["arb"] < 1e-5
+    assert result["frb"] < 1e-5
+
+
+def test_orb_regression_loss_masked():
+    from lemc.train.losses import orb_regression_loss
+
+    residual = torch.zeros(4, 5, 2)
+    target = torch.ones(4, 5, 2)
+    mask = torch.zeros(4, 5, dtype=torch.bool)
+    mask[0, 0] = True
+    residual[0, 0] = 1.0
+    loss = orb_regression_loss(residual, target, mask)
+    assert loss.item() < 1e-5

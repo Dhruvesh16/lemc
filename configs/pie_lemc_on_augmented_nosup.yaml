@@ -1,0 +1,30 @@
+defaults: [default]
+
+dataset: pie
+track_store_file: pie_track_store_augmented.pkl
+run_tag: augmented_nosup
+use_lemc: true
+max_agents: 32
+
+lemc:
+  hidden_dim: 32
+  temporal_net: gru
+
+backbone:
+  hidden_dim: 128
+  num_layers: 2
+  predict_intent: true
+
+train:
+  batch_size: 64
+  lr: 1.0e-3
+  epochs: 40
+  early_stop_patience: 20
+  overlap_train: 0.5
+
+loss:
+  traj_weight: 1.0
+  intent_weight: 1.0
+  residual_l2_penalty: 1.0e-4
+  orb_weight: 0.0
+  obd_weight: 0.0

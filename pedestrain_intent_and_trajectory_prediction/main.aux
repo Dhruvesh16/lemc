@@ -1,0 +1,104 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{who2023roadsafety}
+\citation{alahi2016sociallstm,gupta2018socialgan}
+\citation{zhang2024decouple,czech2023behavior,peng2026trajmamba}
+\citation{lim2025tits}
+\citation{kotseruba2017jaad}
+\citation{neumann2021pedestrian}
+\citation{rublee2011orb}
+\citation{fischler1981ransac}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\citation{lim2025tits}
+\citation{alahi2016sociallstm}
+\citation{gupta2018socialgan}
+\citation{rasouli2019pie}
+\citation{kotseruba2017jaad}
+\citation{kotseruba2021benchmark}
+\citation{zhang2024decouple}
+\citation{czech2023behavior}
+\citation{peng2026trajmamba}
+\citation{lim2025tits}
+\citation{azarmi2024feature}
+\citation{neumann2021pedestrian}
+\citation{gesnouin2022crossdataset}
+\citation{rublee2011orb}
+\citation{zhang2024decouple}
+\citation{lim2025tits}
+\citation{czech2023behavior}
+\citation{peng2026trajmamba}
+\citation{neumann2021pedestrian}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related Work}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{II}{2}{Related Work}{section.2}{}}
+\citation{fischler1981ransac}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Qualitative comparison of ego-motion-aware pedestrian predictors. ADE is not directly comparable across different backbones.}}{3}{table.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:compare}{{I}{3}{Qualitative comparison of ego-motion-aware pedestrian predictors. ADE is not directly comparable across different backbones}{table.caption.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Method}{3}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{III}{3}{Method}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Fixed ORB-affine compensation}{3}{subsection.3.1}\protected@file@percent }
+\newlabel{sec:orb_method}{{\mbox  {III-A}}{3}{Fixed ORB-affine compensation}{subsection.3.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Why global translation fails}{3}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:translation}{{\mbox  {III-B}}{3}{Why global translation fails}{subsection.3.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Fixed ORB-affine pipeline. The offline stage (top, dashed) extracts camera-motion affines once from video. At inference (bottom, solid), only precomputed affines and bounding-box tracks are consumed; no pixels and no ego-motion sensor are required.}}{3}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:arch}{{1}{3}{Fixed ORB-affine pipeline. The offline stage (top, dashed) extracts camera-motion affines once from video. At inference (bottom, solid), only precomputed affines and bounding-box tracks are consumed; no pixels and no ego-motion sensor are required}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Learned LEMC (ablation)}{3}{subsection.3.3}\protected@file@percent }
+\newlabel{sec:lemc_method}{{\mbox  {III-C}}{3}{Learned LEMC (ablation)}{subsection.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Backbone architecture and prediction heads}{3}{subsection.3.4}\protected@file@percent }
+\newlabel{sec:backbone}{{\mbox  {III-D}}{3}{Backbone architecture and prediction heads}{subsection.3.4}{}}
+\citation{rasouli2019pie}
+\citation{zhang2024decouple}
+\citation{kotseruba2017jaad,kotseruba2021benchmark}
+\citation{zhang2024decouple}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Standing-pedestrian variance gate}{4}{subsection.3.5}\protected@file@percent }
+\newlabel{sec:gate_method}{{\mbox  {III-E}}{4}{Standing-pedestrian variance gate}{subsection.3.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Datasets and Experimental Setup}{4}{section.4}\protected@file@percent }
+\newlabel{sec:setup}{{IV}{4}{Datasets and Experimental Setup}{section.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Agent track density per frame. Denser PIE (augmented) provides richer multi-agent context for LEMC; JAAD has sparser tracks on average.}}{4}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:datasets}{{2}{4}{Agent track density per frame. Denser PIE (augmented) provides richer multi-agent context for LEMC; JAAD has sparser tracks on average}{figure.caption.3}{}}
+\citation{lim2025tits}
+\citation{lim2025tits}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Results}{5}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{V}{5}{Results}{section.5}{}}
+\newlabel{sec:strat}{{V}{5}{Results}{figure.caption.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Main quantitative results (test set, mean$\pm $std, 3 seeds). Bold: best trajectory metric per dataset block. Italic: best intent on PIE.}}{6}{table.caption.4}\protected@file@percent }
+\newlabel{tab:main}{{II}{6}{Main quantitative results (test set, mean$\pm $std, 3 seeds). Bold: best trajectory metric per dataset block. Italic: best intent on PIE}{table.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces PIE ADE across all compensation conditions (3 seeds). Fixed ORB stays with the baseline cluster, while all learned LEMC variants are substantially worse. This supports the claim that only fixed geometry preserves trajectory quality on PIE.}}{6}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:res_pie}{{3}{6}{PIE ADE across all compensation conditions (3 seeds). Fixed ORB stays with the baseline cluster, while all learned LEMC variants are substantially worse. This supports the claim that only fixed geometry preserves trajectory quality on PIE}{figure.caption.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Physical validity and ego-state stratification. Top: variance-gate pass rate (\%). Bottom: PIE ADE/FDE (px) by ego state (seed 0). Bold: best ADE per state.}}{6}{table.caption.6}\protected@file@percent }
+\newlabel{tab:diag}{{III}{6}{Physical validity and ego-state stratification. Top: variance-gate pass rate (\%). Bottom: PIE ADE/FDE (px) by ego state (seed 0). Bold: best ADE per state}{table.caption.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Physical validity diagnostics. (a--b) Fixed ORB passes the standing-pedestrian gate on both datasets; learned methods fail. (c) LEMC correlates with OBD ($R^2{=}0.30$) but does not produce physically valid compensation.}}{7}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:res_gate}{{4}{7}{Physical validity diagnostics. (a--b) Fixed ORB passes the standing-pedestrian gate on both datasets; learned methods fail. (c) LEMC correlates with OBD ($R^2{=}0.30$) but does not produce physically valid compensation}{figure.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces ORB geometry validation and ego-state stratification. (a) ORB tracks real camera motion without a speed sensor. (b) Fixed ORB is most robust under acceleration/deceleration, where GT speed hurts most.}}{7}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:res_orb}{{5}{7}{ORB geometry validation and ego-state stratification. (a) ORB tracks real camera motion without a speed sensor. (b) Fixed ORB is most robust under acceleration/deceleration, where GT speed hurts most}{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces JAAD results. (a) Fixed ORB improves all trajectory metrics across seeds. (b--c) Representative overlays show large error reduction after compensation. (d) Validation ADE converges lower with fixed ORB.}}{8}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:res_jaad}{{6}{8}{JAAD results. (a) Fixed ORB improves all trajectory metrics across seeds. (b--c) Representative overlays show large error reduction after compensation. (d) Validation ADE converges lower with fixed ORB}{figure.caption.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Cross-dataset and intent analysis. (a) Fixed ORB is neutral on PIE and strongly beneficial on JAAD. (b) Intent accuracy rises with ego-motion information, indicating a shortcut in intent evaluation.}}{8}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:res_cross}{{7}{8}{Cross-dataset and intent analysis. (a) Fixed ORB is neutral on PIE and strongly beneficial on JAAD. (b) Intent accuracy rises with ego-motion information, indicating a shortcut in intent evaluation}{figure.caption.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Qualitative results. (a) Valid ORB flattening of standing-pedestrian drift. (b) Improved PIE trajectory overlay. (c) Correlation without physical validity. (d) Learned residual failure (looping).}}{9}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:res_qual}{{8}{9}{Qualitative results. (a) Valid ORB flattening of standing-pedestrian drift. (b) Improved PIE trajectory overlay. (c) Correlation without physical validity. (d) Learned residual failure (looping)}{figure.caption.11}{}}
+\citation{azarmi2024feature}
+\bibstyle{IEEEtran}
+\bibdata{refs}
+\bibcite{who2023roadsafety}{1}
+\bibcite{alahi2016sociallstm}{2}
+\bibcite{gupta2018socialgan}{3}
+\bibcite{zhang2024decouple}{4}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Discussion}{10}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{VI}{10}{Discussion}{section.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{10}{section.7}\protected@file@percent }
+\newlabel{sec:conclusion}{{VII}{10}{Conclusion}{section.7}{}}
+\@writefile{toc}{\contentsline {section}{References}{10}{section*.12}\protected@file@percent }
+\bibcite{czech2023behavior}{5}
+\bibcite{peng2026trajmamba}{6}
+\bibcite{lim2025tits}{7}
+\bibcite{kotseruba2017jaad}{8}
+\bibcite{neumann2021pedestrian}{9}
+\bibcite{rublee2011orb}{10}
+\bibcite{fischler1981ransac}{11}
+\bibcite{rasouli2019pie}{12}
+\bibcite{kotseruba2021benchmark}{13}
+\bibcite{azarmi2024feature}{14}
+\gdef \@abspage@last{11}

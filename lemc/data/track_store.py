@@ -6,8 +6,9 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from .paths import PIE_DATA_ROOT
+from .paths import JAAD_DATA_ROOT, PIE_DATA_ROOT
 from .pie_loader import load_pie_database, load_pie_splits
+from .jaad_loader import load_jaad_database, load_jaad_splits, resolve_jaad_root
 
 EGO_IDX = 0  # convention: agent_pids[0] is always the ego pedestrian
 
@@ -70,6 +71,53 @@ def build_pie_track_store(data_root: str = PIE_DATA_ROOT) -> dict[str, SceneStor
 
             stores[scene_id] = store
 
+    return stores
+
+
+
+def build_jaad_track_store(data_root: str | None = None) -> dict[str, SceneStore]:
+    """Build SceneStore dict from JAAD 2.0 annotations (no OBD; vehicle action ints).
+
+    scene_id is the video id (e.g. video_0001). Only pedestrians (ids containing
+    no trailing group marker 'p') that appear in ped_annotations are ego candidates;
+    bystander 'ped' tracks without behavior are still available as other agents.
+    """
+    root = resolve_jaad_root(data_root)
+    db = load_jaad_database(root)
+    splits = load_jaad_splits(root)
+    vid_to_split = {}
+    for split, vids in splits.items():
+        for vid in vids:
+            vid_to_split[vid] = split
+
+    stores: dict[str, SceneStore] = {}
+    for vid, scene in db.items():
+        split = vid_to_split.get(vid)
+        if split is None:
+            continue  # video not in default split files
+        store = SceneStore(
+            scene_id=vid,
+            width=int(scene.get("width", 1920)),
+            height=int(scene.get("height", 1080)),
+            set_split=split,
+        )
+        for pid, rec in scene.get("ped_annotations", {}).items():
+            # Skip 'people' group boxes (id ends with 'p') — not single-agent targets
+            if pid.endswith("p"):
+                continue
+            frames = list(rec["frames"])
+            boxes = rec["bbox"]
+            store.ped_frames[pid] = frames
+            attrs = dict(rec.get("attributes") or {})
+            store.ped_attributes[pid] = attrs
+            for f, box in zip(frames, boxes):
+                store.frame_to_boxes.setdefault(int(f), {})[pid] = _corners_to_center(box)
+
+        veh = scene.get("vehicle_annotations") or {}
+        for f, action in veh.items():
+            store.frame_to_vehicle_action[int(f)] = int(action)
+
+        stores[vid] = store
     return stores
 
 

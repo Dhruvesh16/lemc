@@ -4,8 +4,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from lemc.data.paths import PIE_DATA_ROOT, TRACK_STORE_DIR
-from lemc.data.track_store import build_pie_track_store, save_track_store
+from lemc.data.paths import JAAD_DATA_ROOT, PIE_DATA_ROOT, TRACK_STORE_DIR
+from lemc.data.track_store import build_jaad_track_store, build_pie_track_store, save_track_store
 
 
 def main():
@@ -17,10 +17,8 @@ def main():
         stores = build_pie_track_store(PIE_DATA_ROOT)
         out_path = os.path.join(TRACK_STORE_DIR, "pie_track_store.pkl")
     else:
-        raise NotImplementedError(
-            "JAAD data is not on disk yet -- build_jaad_track_store() will mirror "
-            "build_pie_track_store() once JAAD is downloaded and verified (plan Step 9)."
-        )
+        stores = build_jaad_track_store(JAAD_DATA_ROOT)
+        out_path = os.path.join(TRACK_STORE_DIR, "jaad_track_store.pkl")
 
     save_track_store(stores, out_path)
 

@@ -38,7 +38,12 @@ def obd_correlation_loss(residual: torch.Tensor | None, ego_speed: torch.Tensor)
     OBD speed -- correlation (not an absolute-scale MSE) because it's scale/
     shift invariant, directly optimizing the same statistic
     scripts/05_validate_lemc.py reports as the trust gate. 0 (no gradient)
-    when there's not enough valid-speed signal in the batch to compute it."""
+    when there's not enough valid-speed signal in the batch to compute it.
+
+    Kept as an ablation (attempt-3). Prefer orb_regression_loss for the main
+    result — magnitude correlation discards direction and is circular if the
+    same OBD signal is the trust metric.
+    """
     if residual is None:
         return torch.zeros(())
     mean_mag = residual.norm(dim=-1).mean(dim=1)  # [B]
@@ -51,3 +56,23 @@ def obd_correlation_loss(residual: torch.Tensor | None, ego_speed: torch.Tensor)
     denom = (x.norm() * y.norm()).clamp(min=1e-8)
     r = (x * y).sum() / denom
     return 1.0 - r
+
+
+def orb_regression_loss(
+    residual: torch.Tensor | None,
+    orb_shift: torch.Tensor,
+    orb_mask: torch.Tensor,
+) -> torch.Tensor:
+    """Directional ORB supervision for LEMC residual (Step 8).
+
+    residual / orb_shift: [B, T_obs-1, 2] in the same coordinate units
+    (standardized image-dim-normalized cx,cy). orb_mask: [B, T_obs-1] bool —
+    False where ORB failed / was unavailable. Smooth-L1 on valid transitions.
+    """
+    if residual is None:
+        return torch.zeros(())
+    mask = orb_mask.float().unsqueeze(-1)  # [B, T-1, 1]
+    if mask.sum() < 1:
+        return torch.zeros((), device=residual.device)
+    per = F.smooth_l1_loss(residual, orb_shift, reduction="none")  # [B, T-1, 2]
+    return (per * mask).sum() / mask.sum().clamp(min=1) / residual.shape[-1]

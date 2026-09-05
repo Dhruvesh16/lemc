@@ -1,0 +1,15 @@
+[test] built 1773 windows, dropped 79 (ego gap or incomplete future), dropped_tte=30242
+=== Trajectory metrics (pie, test, n=1773) ===
+  ade: 85.1051
+  fde: 162.6710
+  mse_0.5s: 5236.9990
+  mse_1.0s: 14391.0566
+  mse_1.5s: 43510.1445
+  arb: 46.8015
+  frb: 73.3780
+=== Intent metrics (pie, test, n=1478) ===
+  auc: 0.6902
+  f1: 0.6345
+  precision: 0.6747
+  recall: 0.5988
+=== LEMC residual magnitude (test) === mean=0.04994 std=0.01538

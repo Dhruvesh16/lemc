@@ -1,0 +1,67 @@
+## pie_fixed_orb_affine (n=3 seeds)
+  ade: 95.07 ± 1.28
+  fde: 188.79 ± 3.82
+  arb: 50.35 ± 0.36
+  frb: 84.13 ± 1.65
+  auc: 0.81 ± 0.01
+  f1: 0.63 ± 0.01
+  frac_flatten_all: 0.77 ± 0.00
+  frac_flatten_standing_moving: 0.93 ± 0.00
+
+## pie_fixed_orb_affine_v2 (n=3 seeds)
+  ade: 60.49 ± 1.83
+  fde: 130.28 ± 1.31
+  arb: 32.34 ± 1.75
+  frb: 54.49 ± 0.44
+  auc: 0.80 ± 0.01
+  f1: 0.60 ± 0.01
+  frac_flatten_all: 0.77 ± 0.00
+  frac_flatten_standing_moving: 0.93 ± 0.00
+
+## pie_lemc_augmented_auxobd (n=3 seeds)
+  ade: 85.77 ± 11.19
+  fde: 164.25 ± 11.33
+  arb: 47.36 ± 8.24
+  frb: 73.56 ± 6.67
+  auc: 0.80 ± 0.01
+  f1: 0.60 ± 0.03
+
+## pie_lemc_augmented_nosup (n=3 seeds)
+  ade: 81.68 ± 5.13
+  fde: 159.91 ± 2.39
+  arb: 44.20 ± 4.35
+  frb: 70.56 ± 3.22
+  auc: 0.77 ± 0.05
+  f1: 0.64 ± 0.01
+
+## pie_lemc_augmented_orb (n=3 seeds)
+  ade: 81.14 ± 2.81
+  fde: 160.78 ± 1.58
+  arb: 43.86 ± 2.11
+  frb: 70.25 ± 2.22
+  auc: 0.77 ± 0.06
+  f1: 0.63 ± 0.01
+
+## pie_lemc_augmented_orb_affine (n=3 seeds)
+  ade: 81.73 ± 4.61
+  fde: 163.54 ± 7.55
+  arb: 43.74 ± 2.29
+  frb: 71.93 ± 5.51
+  auc: 0.81 ± 0.01
+  f1: 0.63 ± 0.00
+
+## pie_nolemc_augmented_base (n=3 seeds)
+  ade: 60.81 ± 3.31
+  fde: 121.75 ± 9.87
+  arb: 33.96 ± 1.42
+  frb: 56.52 ± 4.25
+  auc: 0.89 ± 0.01
+  f1: 0.74 ± 0.03
+
+## pie_nolemc_augmented_speed (n=3 seeds)
+  ade: 66.96 ± 1.28
+  fde: 136.89 ± 3.02
+  arb: 36.20 ± 1.83
+  frb: 59.66 ± 2.06
+  auc: 0.93 ± 0.01
+  f1: 0.85 ± 0.02
